@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ポケモン相性チェッカー</title>
+
+<style>
+body{
+    font-family:sans-serif;
+    background:linear-gradient(
+        135deg,
+        #f3f4f6 0%,
+        #e9edf3 100%
+    );
+    padding:20px;
+}
+
+.container{
+    max-width:800px;
+    margin:auto;
+    background:white;
+    border-radius:24px;
+    padding:24px;
+    border:1px solid #ececec;
+    box-shadow:0 12px 30px rgba(0,0,0,.08);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:24px;
+    font-size:2rem;
+    font-weight:900;
+    color:#1f2937;
+}
+
+.selected{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.box{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:18px;
+    padding:16px;
+    text-align:center;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+.type-label{
+    font-size:15px;
+    font-weight:800;
+    color:#374151;
+    margin-bottom:10px;
+}
+
+#type1,
+#type2{
+    font-size:18px;
+    font-weight:700;
+}
+
+.button-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+}
+
+@media (min-width:768px){
+    .button-grid{
+        grid-template-columns:repeat(6,1fr);
+    }
+}
+
+.type-btn{
+    border:none;
+    border-radius:999px;
+
+    height:56px;
+    padding:0 16px;
+
+    color:white;
+    font-size:16px;
+    font-weight:800;
+    letter-spacing:.05em;
+
+    cursor:pointer;
+
+    box-shadow:0 3px 8px rgba(0,0,0,.15);
+
+    transition:
+        transform .15s ease,
+        filter .15s ease,
+        box-shadow .15s ease;
+}
+
+.type-btn:hover{
+    transform:translateY(-2px);
+    filter:brightness(1.08);
+    box-shadow:0 6px 12px rgba(0,0,0,.2);
+}
+
+.type-btn:active{
+    transform:translateY(1px);
+}
+
+.type-btn:disabled{
+    opacity:.4;
+    cursor:not-allowed;
+}
+
+.action{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:20px;
+}
+
+.action button{
+    height:54px;
+    border:none;
+    border-radius:999px;
+    color:white;
+    font-size:16px;
+    font-weight:800;
+    cursor:pointer;
+    transition:.15s;
+}
+
+.action button:hover{
+    transform:translateY(-2px);
+}
+
+.confirm{
+    background:linear-gradient(
+        180deg,
+        #59e38f,
+        #2ecc71
+    );
+}
+
+.clear{
+    background:linear-gradient(
+        180deg,
+        #ff8075,
+        #e74c3c
+    );
+}
+
+.result{
+    margin-top:25px;
+}
+
+.result table{
+    width:100%;
+    border-collapse:collapse;
+    overflow:hidden;
+    border-radius:16px;
+}
+
+.result th{
+    width:110px;
+    background:#f8fafc;
+    font-weight:800;
+}
+
+.result th,
+.result td{
+    border:1px solid #e5e7eb;
+    padding:12px;
+}
+
+.badge{
+    display:inline-block;
+    padding:4px 8px;
+    margin:2px;
+    border-radius:999px;
+    color:white;
+    font-size:12px;
+    font-weight:700;
+}
+
+.selected .badge{
+    font-size:16px;
+    padding:8px 16px;
+}
+
+.empty-type{
+    color:#999;
+    font-weight:normal;
+}
+
+/* タイプ色 */
+
+.normal{
+    background:linear-gradient(
+        180deg,
+        #c9cbc9 0%,
+        #9fa19f 50%,
+        #7c7d7c 100%
+    );
+}
+
+.fire{
+    background:linear-gradient(
+        180deg,
+        #ff8d67 0%,
+        #e62829 50%,
+        #b1191a 100%
+    );
+}
+
+.water{
+    background:linear-gradient(
+        180deg,
+        #75cfff 0%,
+        #2980ef 50%,
+        #1457ac 100%
+    );
+}
+
+.electric{
+    background:linear-gradient(
+        180deg,
+        #ffe773 0%,
+        #fac000 50%,
+        #d99c00 100%
+    );
+}
+
+.grass{
+    background:linear-gradient(
+        180deg,
+        #70df62 0%,
+        #3fa129 50%,
+        #2c761d 100%
+    );
+}
+
+.ice{
+    background:linear-gradient(
+        180deg,
+        #b8f5ff 0%,
+        #3fd8ff 50%,
+        #21b5da 100%
+    );
+}
+
+.fighting{
+    background:linear-gradient(
+        180deg,
+        #ffb055 0%,
+        #ff8000 50%,
+        #d66600 100%
+    );
+}
+
+.poison{
+    background:linear-gradient(
+        180deg,
+        #bb72f0 0%,
+        #9141cb 50%,
+        #7028a7 100%
+    );
+}
+
+.ground{
+    background:linear-gradient(
+        180deg,
+        #c78c4d 0%,
+        #915121 50%,
+        #6c3915 100%
+    );
+}
+
+.flying{
+    background:linear-gradient(
+        180deg,
+        #b5d8ff 0%,
+        #81b9ef 50%,
+        #5d9dd9 100%
+    );
+}
+
+.psychic{
+    background:linear-gradient(
+        180deg,
+        #ff82aa 0%,
+        #ef4179 50%,
+        #cb275c 100%
+    );
+}
+
+.bug{
+    background:linear-gradient(
+        180deg,
+        #bfd84f 0%,
+        #91a119 50%,
+        #6f7c10 100%
+    );
+}
+
+.rock{
+    background:linear-gradient(
+        180deg,
+        #cdc49d 0%,
+        #afa981 50%,
+        #8e8762 100%
+    );
+}
+
+.ghost{
+    background:linear-gradient(
+        180deg,
+        #957195 0%,
+        #704170 50%,
+        #532d53 100%
+    );
+}
+
+.dragon{
+    background:linear-gradient(
+        180deg,
+        #7987ff 0%,
+        #5060e1 50%,
+        #3747c0 100%
+    );
+}
+
+.dark{
+    background:linear-gradient(
+        180deg,
+        #8a7071 0%,
+        #624d4e 50%,
+        #463435 100%
+    );
+}
+
+.steel{
+    background:linear-gradient(
+        180deg,
+        #8fc7d8 0%,
+        #60a1b8 50%,
+        #417c91 100%
+    );
+}
+
+.fairy{
+    background:linear-gradient(
+        180deg,
+        #ffa5ff 0%,
+        #ef70ef 50%,
+        #d34cd3 100%
+    );
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+    <h1>ポケモン相性チェッカー</h1>
+
+    <div class="selected">
+
+        <div class="box">
+            <div class="type-label">タイプ1</div>
+            <div id="type1">
+                <span class="empty-type">なし</span>
+            </div>
+        </div>
+
+        <div class="box">
+            <div class="type-label">タイプ2</div>
+            <div id="type2">
+                <span class="empty-type">なし</span>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="buttonArea" class="button-grid"></div>
+
+    <div class="action">
+        <button class="clear" onclick="clearSelection()">
+            取り消し
+        </button>
+
+        <button class="confirm" onclick="showResult()">
+            判定
+        </button>
+    </div>
+
+    <div id="result" class="result"></div>
+
+</div>
+
+<script>
+
+const types = [
+"ノーマル","ほのお","みず","でんき","くさ","こおり",
+"かくとう","どく","じめん","ひこう","エスパー",
+"むし","いわ","ゴースト","ドラゴン","あく","はがね","フェアリー"
+];
+
+const classMap={
+"ノーマル":"normal",
+"ほのお":"fire",
+"みず":"water",
+"でんき":"electric",
+"くさ":"grass",
+"こおり":"ice",
+"かくとう":"fighting",
+"どく":"poison",
+"じめん":"ground",
+"ひこう":"flying",
+"エスパー":"psychic",
+"むし":"bug",
+"いわ":"rock",
+"ゴースト":"ghost",
+"ドラゴン":"dragon",
+"あく":"dark",
+"はがね":"steel",
+"フェアリー":"fairy"
+};
+
+let selected1=null;
+let selected2=null;
+
+const relations={
+
+"ノーマル":{"いわ":0.5,"ゴースト":0,"はがね":0.5},
+
+"ほのお":{"くさ":2,"こおり":2,"むし":2,"はがね":2,"ほのお":0.5,"みず":0.5,"いわ":0.5,"ドラゴン":0.5},
+
+"みず":{"ほのお":2,"じめん":2,"いわ":2,"みず":0.5,"くさ":0.5,"ドラゴン":0.5},
+
+"でんき":{"みず":2,"ひこう":2,"でんき":0.5,"くさ":0.5,"ドラゴン":0.5,"じめん":0},
+
+"くさ":{"みず":2,"じめん":2,"いわ":2,"ほのお":0.5,"くさ":0.5,"どく":0.5,"ひこう":0.5,"むし":0.5,"ドラゴン":0.5,"はがね":0.5},
+
+"こおり":{"くさ":2,"じめん":2,"ひこう":2,"ドラゴン":2,"ほのお":0.5,"みず":0.5,"こおり":0.5,"はがね":0.5},
+
+"かくとう":{"ノーマル":2,"こおり":2,"いわ":2,"あく":2,"はがね":2,"どく":0.5,"ひこう":0.5,"エスパー":0.5,"むし":0.5,"フェアリー":0.5,"ゴースト":0},
+
+"どく":{"くさ":2,"フェアリー":2,"どく":0.5,"じめん":0.5,"いわ":0.5,"ゴースト":0.5,"はがね":0},
+
+"じめん":{"ほのお":2,"でんき":2,"どく":2,"いわ":2,"はがね":2,"くさ":0.5,"むし":0.5,"ひこう":0},
+
+"ひこう":{"くさ":2,"かくとう":2,"むし":2,"でんき":0.5,"いわ":0.5,"はがね":0.5},
+
+"エスパー":{"かくとう":2,"どく":2,"エスパー":0.5,"はがね":0.5,"あく":0},
+
+"むし":{"くさ":2,"エスパー":2,"あく":2,"ほのお":0.5,"かくとう":0.5,"どく":0.5,"ひこう":0.5,"ゴースト":0.5,"はがね":0.5,"フェアリー":0.5},
+
+"いわ":{"ほのお":2,"こおり":2,"ひこう":2,"むし":2,"かくとう":0.5,"じめん":0.5,"はがね":0.5},
+
+"ゴースト":{"エスパー":2,"ゴースト":2,"あく":0.5,"ノーマル":0},
+
+"ドラゴン":{"ドラゴン":2,"はがね":0.5,"フェアリー":0},
+
+"あく":{"エスパー":2,"ゴースト":2,"かくとう":0.5,"あく":0.5,"フェアリー":0.5},
+
+"はがね":{"こおり":2,"いわ":2,"フェアリー":2,"ほのお":0.5,"みず":0.5,"でんき":0.5,"はがね":0.5},
+
+"フェアリー":{"かくとう":2,"ドラゴン":2,"あく":2,"ほのお":0.5,"どく":0.5,"はがね":0.5}
+
+};
+
+const buttonArea=document.getElementById("buttonArea");
+
+types.forEach(type=>{
+    const btn=document.createElement("button");
+    btn.className="type-btn "+classMap[type];
+    btn.textContent=type;
+    btn.onclick=()=>selectType(type);
+    buttonArea.appendChild(btn);
+});
+
+function selectType(type){
+    if(type===selected1 || type===selected2){
+        return;
+    }
+    if(selected1===null){
+        selected1=type;
+        document.getElementById("type1").innerHTML =
+            `<span class="badge ${classMap[type]}">${type}</span>`;
+        return;
+    }
+    if(selected2===null){
+        selected2=type;
+        document.getElementById("type2").innerHTML =
+            `<span class="badge ${classMap[type]}">${type}</span>`;
+    }
+}
+
+function clearSelection(){
+
+    selected1=null;
+    selected2=null;
+
+    document.getElementById("type1").innerHTML =
+        '<span class="empty-type">なし</span>';
+
+    document.getElementById("type2").innerHTML =
+        '<span class="empty-type">なし</span>';
+
+    document.getElementById("result").innerHTML="";
+}
+
+function showResult(){
+
+    if(selected1===null){
+        alert("タイプを選択してください");
+        return;
+    }
+
+    const result={
+        "4":[],
+        "2":[],
+        "1":[],
+        "0.5":[],
+        "0.25":[],
+        "0":[]
+    };
+
+    types.forEach(attackType=>{
+
+        let mult=1;
+
+        if(selected1){
+            mult*=relations[attackType]?.[selected1] ?? 1;
+        }
+
+        if(selected2){
+            mult*=relations[attackType]?.[selected2] ?? 1;
+        }
+
+        result[mult.toString()].push(attackType);
+
+    });
+
+    let html=`
+    <table>
+    <tr><th>4倍</th><td>${makeBadges(result["4"])}</td></tr>
+    <tr><th>2倍</th><td>${makeBadges(result["2"])}</td></tr>
+    <tr><th>1倍</th><td>${makeBadges(result["1"])}</td></tr>
+    <tr><th>0.5倍</th><td>${makeBadges(result["0.5"])}</td></tr>
+    <tr><th>0.25倍</th><td>${makeBadges(result["0.25"])}</td></tr>
+    <tr><th>無効</th><td>${makeBadges(result["0"])}</td></tr>
+    </table>
+    `;
+
+    document.getElementById("result").innerHTML=html;
+}
+
+function makeBadges(list){
+
+    if(list.length===0){
+        return "なし";
+    }
+
+    return list.map(type=>{
+        return `<span class="badge ${classMap[type]}">${type}</span>`;
+    }).join("");
+}
+
+</script>
+
+</body>
+</html>
